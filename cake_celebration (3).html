@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cake Celebration</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #ffe6f0, #fff0f5);
+    overflow: hidden;
+    font-family: 'Comic Sans MS', cursive;
+    text-align: center;
+  }
+
+  /* Flags */
+  .flags { display: flex; justify-content: center; gap: 10px; padding: 10px; }
+  .flag { width: 40px; height: 60px; background: #ff4d80; clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); animation: swing 2s ease-in-out infinite; }
+  @keyframes swing {0%,100%{transform:rotate(5deg);}50%{transform:rotate(-5deg);} }
+
+  /* Balloons */
+  .balloon { position: absolute; width: 40px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff7aa2, #ff4d80); animation: rise linear infinite, sway 3s ease-in-out infinite alternate; }
+  @keyframes rise {0%{transform:translateY(100vh);opacity:0;}20%{opacity:1;}100%{transform:translateY(-100px);opacity:0;}}
+  @keyframes sway {0%{transform:translateX(0px);}50%{transform:translateX(15px);}100%{transform:translateX(0px);}}
+
+  /* Cake */
+  .cake { margin: 200px auto 20px; width: 280px; height: 180px; position: relative; perspective: 1000px; cursor:pointer; }
+  .half { width: 50%; height: 100%; float: left; transition: transform 0.5s ease; }
+  .layer { width: 100%; height: 60px; border-radius: 20px 20px 0 0; position: relative; box-shadow: inset 0 -4px 10px rgba(0,0,0,0.2),0 5px 10px rgba(0,0,0,0.1);}
+  .top { background: linear-gradient(#ffb6c1,#ff99b3); }
+  .middle { background: linear-gradient(#ffe4e1,#ffd6db); }
+  .bottom { background: linear-gradient(#ffb6c1,#ff8fb3); border-radius:0 0 20px 20px;}
+  .icing { position:absolute; top:0; left:0; width:100%; height:15px; background: linear-gradient(#fff,#ffe9f0); border-radius:20px 20px 0 0; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.1);}
+  .candles {position:absolute; top:-40px; left:50%; transform:translateX(-50%); display:flex; gap:15px;}
+  .candle {width:12px; height:40px; background:yellow; border-radius:3px; position:relative;}
+  .candle::before {content:""; position:absolute; top:-15px; left:50%; transform:translateX(-50%); width:12px; height:15px; background:orange; border-radius:50%; animation:flicker 0.3s infinite;}
+  @keyframes flicker {0%,100%{opacity:1;}50%{opacity:0.6;}}
+
+  /* Knife */
+  .knife-container {position:absolute; pointer-events:none; top:50%; left:50%; z-index:10;}
+  .knife {display:flex; width:120px; height:25px; transform-origin:center; animation:bounce 1s ease-in-out infinite alternate;}
+  @keyframes bounce {0%{transform:translateY(0px) rotate(0deg);}50%{transform:translateY(-10px) rotate(-2deg);}100%{transform:translateY(0px) rotate(0deg);}}
+  .blade {width:80px; height:100%; background:linear-gradient(135deg,#dcdcdc,#f5f5f5,#aaa); clip-path:polygon(0 0,100% 40%,100% 60%,0 100%); border:1px solid #888;}
+  .handle {width:40px; height:100%; background:#333; border-radius:5px; margin-left:2px;}
+
+  /* Confetti */
+  .confetti {position:absolute; width:10px; height:10px; border-radius:50%; animation:fall 3s linear forwards; z-index:20;}
+  @keyframes fall {0%{transform:translateY(0) rotate(0);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+  /* Celebration text */
+  .celebrate {position:absolute; top:120px; left:50%; transform:translateX(-50%); font-size:50px; font-weight:bold; color:#ff1493; text-shadow:0 0 10px #fff,0 0 20px #ff69b4; opacity:0; transition:opacity 1s ease; z-index:15;}
+
+  /* Note */
+  .note {position:absolute; top:80px; left:50%; transform:translateX(-50%); font-size:22px; color:#ff1493; font-weight:bold; text-shadow:0 0 5px #fff; }
+
+  /* Next button */
+  .next-btn {position:absolute; bottom:30px; left:50%; transform:translateX(-50%) scale(0); padding:12px 25px; font-size:20px; background:#ff4d80; color:#fff; border:none; border-radius:12px; cursor:pointer; display:block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); opacity:0; transition: all 0.5s ease;}
+  .next-btn.show {opacity:1; transform:translateX(-50%) scale(1); animation:bounceBtn 1s ease infinite alternate;}
+  @keyframes bounceBtn {0%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.1);}100%{transform:translateX(-50%) scale(1);}}  
+</style>
+</head>
+<body>
+
+<div class="flags">
+  <div class="flag"></div>
+  <div class="flag" style="background:#ffa500;"></div>
+  <div class="flag" style="background:#00bfff;"></div>
+  <div class="flag" style="background:#32cd32;"></div>
+  <div class="flag" style="background:#ff69b4;"></div>
+</div>
+
+<div class="note">🎂 Move the knife to cut the cake!</div>
+
+<div class="cake" id="cake">
+  <div class="half" id="leftHalf">
+    <div class="layer top"><div class="icing"></div></div>
+    <div class="layer middle"></div>
+    <div class="layer bottom"></div>
+  </div>
+  <div class="half" id="rightHalf">
+    <div class="layer top"><div class="icing"></div></div>
+    <div class="layer middle"></div>
+    <div class="layer bottom"></div>
+  </div>
+  <div class="candles"><div class="candle"></div><div class="candle"></div><div class="candle"></div></div>
+</div>
+
+<div class="knife-container" id="knifeContainer">
+  <div class="knife">
+    <div class="blade"></div>
+    <div class="handle"></div>
+  </div>
+</div>
+
+<div class="celebrate" id="celebrate">🎉 Happy Celebration! 🎂</div>
+
+<button class="next-btn" id="nextBtn">Next</button>
+
+<script>
+const knifeContainer = document.getElementById("knifeContainer");
+const cake = document.getElementById("cake");
+const leftHalf = document.getElementById("leftHalf");
+const rightHalf = document.getElementById("rightHalf");
+const celebrate = document.getElementById("celebrate");
+const nextBtn = document.getElementById("nextBtn");
+let cutDone = false;
+
+// Knife follows cursor
+document.addEventListener("mousemove", e => {
+  knifeContainer.style.left = e.pageX + "px";
+  knifeContainer.style.top = e.pageY + "px";
+});
+
+// Cake cut logic
+document.addEventListener("mousemove", e => {
+  const rect = cake.getBoundingClientRect();
+  if(e.pageX > rect.left && e.pageX < rect.right && e.pageY > rect.top && e.pageY < rect.bottom){
+    if(!cutDone){
+      cutDone = true;
+      leftHalf.style.transform = "translateX(-150px) rotate(-15deg)";
+      rightHalf.style.transform = "translateX(150px) rotate(15deg)";
+      celebrate.style.opacity = 1;
+      nextBtn.classList.add("show");
+
+      // Confetti
+      const colors = ["#ff4d80","#ffb347","#87ceeb","#32cd32","#ff69b4"];
+      for(let i=0;i<100;i++){
+        let c = document.createElement("div");
+        c.classList.add("confetti");
+        c.style.left = Math.random()*100+"vw";
+        c.style.top = Math.random()*20+"vh";
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),3000);
+      }
+
+      // Balloons rising
+      const balloonInterval = setInterval(()=>{
+        let b = document.createElement("div");
+        b.classList.add("balloon");
+        b.style.left = Math.random()*90+"vw";
+        b.style.animationDuration = (6 + Math.random()*4)+"s";
+        document.body.appendChild(b);
+        setTimeout(()=>b.remove(),8000);
+      }, 400);
+    }
+  }
+});
+
+// Next button click
+nextBtn.addEventListener("click", ()=>{alert("Next Page Placeholder!");});
+</script>
+
+</body>
+</html>
